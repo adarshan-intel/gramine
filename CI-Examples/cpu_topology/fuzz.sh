@@ -14,5 +14,5 @@ fi
 # clang-18 -fsanitize=fuzzer sanitize_cputopology.c -o executable-name
 # ./executable-name values_corpus -max_total_time=$TIME
 
-clang-18 -fsanitize=fuzzer out.c -o executable-name
+clang-18 -fsanitize=fuzzer sanitize_cputopology.c -o executable-name
 ./executable-name values_corpus -max_total_time=$TIME

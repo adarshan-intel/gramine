@@ -7,6 +7,7 @@
 
 #include "assert.h"
 #include "pal_topology.h"
+#include "sanitize_cputopology.h"
 
 #define IS_IN_RANGE_INCL(x, min, max) ((x) >= (min) && (x) <= (max) ? 1 : 0)
 #define READ_ONCE(x)                                      \
@@ -206,11 +207,9 @@ int LLVMFuzzerTestOneInput(const uint32_t* Data, size_t Size) {
     struct pal_topo_info* topo_info = malloc(sizeof(struct pal_topo_info));
     memset(topo_info, 0, sizeof(struct pal_topo_info));
 
-    // READ
     printf("-----------------------\n");
     size_t index = 0;
 
-    // cache info
     topo_info->caches_cnt = (Data[index++] % MAX_CACHES) + 1;
     topo_info->caches     = malloc(topo_info->caches_cnt * sizeof(struct pal_cache_info));
     for (size_t i = 0; i < topo_info->caches_cnt; i++) {
@@ -222,7 +221,6 @@ int LLVMFuzzerTestOneInput(const uint32_t* Data, size_t Size) {
         topo_info->caches[i].physical_line_partition = Data[index++] % (1 << 16) + 1;
     }
 
-    // thread info
     topo_info->threads_cnt = (Data[index++] % MAX_THREADS) + 1;
     topo_info->threads     = malloc(topo_info->threads_cnt * sizeof(struct pal_cpu_thread_info));
     for (size_t i = 0; i < topo_info->threads_cnt; i++) {
@@ -232,15 +230,9 @@ int LLVMFuzzerTestOneInput(const uint32_t* Data, size_t Size) {
             for (size_t j = 0; j < MAX_CACHES; j++) {
                 topo_info->threads[i].ids_of_caches[j] = Data[index++];
             }
-        } else {
-            topo_info->threads[i].core_id = 0;
-            for (size_t j = 0; j < MAX_CACHES; j++) {
-                topo_info->threads[i].ids_of_caches[j] = 0;
-            }
         }
     }
 
-    // core info
     topo_info->cores_cnt = (Data[index++] % MAX_CORES) + 1;
     topo_info->cores     = malloc(topo_info->cores_cnt * sizeof(struct pal_cpu_core_info));
     for (size_t i = 0; i < topo_info->cores_cnt; i++) {
@@ -248,14 +240,12 @@ int LLVMFuzzerTestOneInput(const uint32_t* Data, size_t Size) {
         topo_info->cores[i].node_id   = Data[index++];
     }
 
-    // socket info
     topo_info->sockets_cnt = (Data[index++] % MAX_SOCKETS) + 1;
     topo_info->sockets     = malloc(topo_info->sockets_cnt * sizeof(struct pal_socket_info));
     for (size_t i = 0; i < topo_info->sockets_cnt; i++) {
         topo_info->sockets[i].unused = Data[index++] % 26 + 'a';
     }
 
-    // numa node info
     topo_info->numa_nodes_cnt = (Data[index++] % MAX_NUMA_NODES) + 1;
     topo_info->numa_nodes = malloc(topo_info->numa_nodes_cnt * sizeof(struct pal_numa_node_info));
     for (size_t i = 0; i < topo_info->numa_nodes_cnt; i++) {
@@ -267,7 +257,6 @@ int LLVMFuzzerTestOneInput(const uint32_t* Data, size_t Size) {
         }
     }
 
-    // numa distance matrix
     topo_info->numa_distance_matrix =
         malloc(topo_info->numa_nodes_cnt * topo_info->numa_nodes_cnt * sizeof(size_t));
     for (size_t i = 0; i < topo_info->numa_nodes_cnt; i++) {
@@ -276,11 +265,9 @@ int LLVMFuzzerTestOneInput(const uint32_t* Data, size_t Size) {
         }
     }
 
-    print_data(topo_info);
-
-    // SANITIZE
     int ret = sanitize_topo_info(topo_info);
     if (ret == 0) {
+        print_data(topo_info);
         printf("Sanitize successful\n");
     } else {
         printf("Sanitize failed\n");
