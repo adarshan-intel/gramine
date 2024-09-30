@@ -7,10 +7,12 @@ if [ -z "$TIME" ]; then
 fi
 
 INPUT_FILE="sanitize_cputopology.c"
+EXECUTABLE_NAME="executable-name"
 
-clang-18 -fsanitize=fuzzer -fprofile-instr-generate -fcoverage-mapping -mllvm -runtime-counter-relocation "$INPUT_FILE" -o executable-name
+clang-18 -fsanitize=fuzzer -fprofile-instr-generate -fcoverage-mapping -mllvm -runtime-counter-relocation "$INPUT_FILE" -o "$EXECUTABLE_NAME"
 
-LLVM_PROFILE_FILE="executable-name.profraw" ./executable-name values_corpus -max_total_time=$TIME
+LLVM_PROFILE_FILE="${EXECUTABLE_NAME}.profraw" ./"$EXECUTABLE_NAME" values_corpus -max_total_time=$TIME
 
-llvm-profdata merge -sparse executable-name.profraw -o executable-name.profdata
-llvm-cov report ./executable-name -instr-profile=executable-name.profdata
+llvm-profdata merge -sparse "${EXECUTABLE_NAME}.profraw" -o "${EXECUTABLE_NAME}.profdata"
+
+llvm-cov report ./"$EXECUTABLE_NAME" -instr-profile="${EXECUTABLE_NAME}.profdata"
