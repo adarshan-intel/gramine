@@ -1,12 +1,6 @@
 PyTorch PPML Framework Tutorial
 ===============================
 
-.. warning::
-
-   This tutorial is outdated and may not work on the current Gramine version /
-   currently supported Linux distributions. Contributions to refresh it are
-   welcomed!
-
 .. highlight:: sh
 
 This tutorial presents a framework for developing PPML (Privacy-Preserving
@@ -91,7 +85,7 @@ user who will decrypt it and analyze its contents.
 Prerequisites
 -------------
 
-- Ubuntu 20.04.
+- Ubuntu 20.04 or Ubuntu 24.04
 
 - PyTorch (Python3). PyTorch is a framework for machine learning based on
   Python. Please `install PyTorch <https://pytorch.org/get-started/locally/>`__
@@ -100,6 +94,15 @@ Prerequisites
 
 - Gramine v1.5, with DCAP support. DCAP software infrastructure must also be
   installed.
+
+- Virtual Environment. It is recommended to use a virtual environment to manage
+  dependencies. You can create and activate a virtual environment with the
+  following commands:
+
+  .. code-block:: sh
+
+     python3 -m venv my_venv
+     source my_venv/bin/activate
 
 Executing Native PyTorch
 ------------------------
@@ -541,3 +544,4 @@ Cleaning Up
 When done, don't forget to terminate the secret provisioning server::
 
    killall server_dcap
+
